@@ -1,0 +1,337 @@
+/* react-modern-video-player — override any of these variables on .vl-player or a parent */
+.vl-player {
+  --vl-accent: #8b5cf6;
+  --vl-radius: 14px;
+  --vl-center-size: 76px;
+  --vl-cursor-size: 104px;
+  --vl-cursor-bg: #fff;
+  --vl-cursor-color: #111;
+
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #000;
+  border-radius: var(--vl-radius);
+  color: #fff;
+  font-family: inherit;
+  outline: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.vl-player:focus-visible {
+  box-shadow: 0 0 0 3px var(--vl-accent);
+}
+
+.vl-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* invisible layer: click = play/pause */
+.vl-surface {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+}
+
+/* ---------- center play / pause circle ---------- */
+
+.vl-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--vl-center-size);
+  height: var(--vl-center-size);
+  margin: calc(var(--vl-center-size) / -2) 0 0 calc(var(--vl-center-size) / -2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: rgba(15, 15, 20, 0.55);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: calc(var(--vl-center-size) * 0.42);
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.2s, transform 0.2s, background 0.2s;
+}
+
+/* show on hover, on keyboard focus, and whenever the video is paused */
+.vl-player:hover .vl-center,
+.vl-center:focus-visible,
+.vl-paused .vl-center {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.vl-center:hover {
+  background: var(--vl-accent);
+  border-color: transparent;
+  transform: scale(1.08);
+}
+
+.vl-center:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+/* the word "Play" / "Pause" under the circle */
+.vl-center-label {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(15, 15, 20, 0.7);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ---------- cursor-following circle (overlay="cursor") ---------- */
+
+.vl-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.vl-cursor-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--vl-cursor-size);
+  height: var(--vl-cursor-size);
+  padding-left: 0.14em; /* balances the trailing letter-spacing */
+  border-radius: 50%;
+  background: var(--vl-cursor-bg);
+  color: var(--vl-cursor-color);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  transform: scale(0);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s;
+}
+
+.vl-cursor[data-show="true"] .vl-cursor-circle {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* our circle replaces the mouse pointer over the video
+   (!important so it also beats a site-wide custom cursor) */
+.vl-overlay-cursor .vl-surface,
+.vl-overlay-cursor .vl-video { cursor: none !important; }
+
+/* touch screens: no mouse, so use the center button instead */
+.vl-center.vl-center-fallback { display: none; }
+
+@media (hover: none) {
+  .vl-center.vl-center-fallback { display: flex; }
+  .vl-cursor { display: none; }
+  .vl-overlay-cursor .vl-surface,
+  .vl-overlay-cursor .vl-video { cursor: pointer !important; }
+}
+
+/* playing + mouse idle: hide everything and the cursor */
+.vl-player.vl-idle { cursor: none; }
+.vl-player.vl-idle .vl-surface { cursor: none; }
+.vl-player.vl-idle .vl-center { opacity: 0; }
+.vl-player.vl-idle .vl-controls { opacity: 0; pointer-events: none; }
+
+/* ---------- buffering spinner ---------- */
+
+.vl-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: var(--vl-accent);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  animation: vl-spin 0.8s linear infinite;
+}
+
+.vl-loading .vl-spinner { opacity: 1; }
+.vl-loading .vl-center { opacity: 0; }
+
+@keyframes vl-spin { to { transform: rotate(360deg); } }
+
+/* ---------- control bar ---------- */
+
+.vl-controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.88));
+  transition: opacity 0.25s;
+}
+
+.vl-controls-custom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.vl-timeline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.vl-row,
+.vl-row-group {
+  display: flex;
+  align-items: center;
+}
+
+.vl-row { justify-content: space-between; }
+.vl-row-group { gap: 10px; }
+
+.vl-time {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.vl-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.vl-button:hover { background: rgba(255, 255, 255, 0.18); }
+.vl-button:focus-visible { outline: 2px solid var(--vl-accent); }
+
+.vl-speed {
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 0 8px;
+}
+
+/* ---------- sliders ---------- */
+
+.vl-progress {
+  flex: 1;
+  min-width: 0;
+  height: 5px;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  border-radius: 10px;
+  --progress: 0%;
+  --buffered: 0%;
+  background: linear-gradient(
+    to right,
+    var(--vl-accent) var(--progress),
+    rgba(255, 255, 255, 0.55) var(--progress),
+    rgba(255, 255, 255, 0.55) var(--buffered),
+    rgba(255, 255, 255, 0.22) var(--buffered)
+  );
+}
+
+.vl-progress::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--vl-accent);
+}
+
+.vl-progress::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border: 2px solid var(--vl-accent);
+  border-radius: 50%;
+  background: #fff;
+}
+
+.vl-volume {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vl-volume input {
+  width: 75px;
+  accent-color: var(--vl-accent);
+  cursor: pointer;
+}
+
+/* ---------- light theme ---------- */
+
+.vl-light .vl-controls {
+  background: linear-gradient(transparent, rgba(255, 255, 255, 0.94));
+  color: #111;
+}
+
+.vl-light .vl-button:hover { background: rgba(0, 0, 0, 0.08); }
+.vl-light .vl-progress {
+  background: linear-gradient(
+    to right,
+    var(--vl-accent) var(--progress),
+    rgba(0, 0, 0, 0.4) var(--progress),
+    rgba(0, 0, 0, 0.4) var(--buffered),
+    rgba(0, 0, 0, 0.15) var(--buffered)
+  );
+}
+
+/* ---------- fullscreen + mobile ---------- */
+
+.vl-player:fullscreen {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+
+@media (max-width: 600px) {
+  .vl-player { --vl-center-size: 60px; --vl-cursor-size: 84px; }
+  .vl-controls { padding: 12px; }
+  .vl-volume input { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vl-center, .vl-controls, .vl-button, .vl-cursor-circle { transition: none; }
+  .vl-spinner { animation-duration: 2s; }
+}

@@ -1,0 +1,67 @@
+{
+  "name": "react-modern-video-player",
+  "version": "0.1.2",
+  "description": "Customizable React video player with custom controls, play/pause overlay, keyboard shortcuts and themes. Zero dependencies, ~5 KB gzipped.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/copy-types.js",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "vite": "^7.0.0"
+  },
+  "keywords": [
+    "react",
+    "react-video-player",
+    "react-player",
+    "video-player",
+    "video",
+    "html5-video",
+    "video-controls",
+    "custom-controls",
+    "lightweight",
+    "tiny",
+    "hooks",
+    "typescript",
+    "mp4",
+    "fullscreen",
+    "playback-speed"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/V-Flash/react-modern-video-player.git"
+  },
+  "bugs": {
+    "url": "https://github.com/V-Flash/react-modern-video-player/issues"
+  },
+  "homepage": "https://github.com/V-Flash/react-modern-video-player#readme",
+  "author": "VIVEK PARMAR",
+  "license": "MIT"
+}
